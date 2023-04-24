@@ -44,8 +44,12 @@ import * as utl from './utils.js';
   const castigos = await Scene.root.findByPath("**/bad*");
 
   //*NOTE: inicializar la barra de tiempo 
-  tamanioYposicion(rectanguloTiempo,display_width,display_height,80,6,10,8);
-  // rectanguloTiempo.hidden = false;
+  tamanioYposicion(rectanguloTiempo,display_width,display_height,80,6,10,8,false);
+  tamanioYposicion(textScore,display_width,display_height,37,6,10,13,false);
+  tamanioYposicion(textVidas,display_width,display_height,37,6,10,16,false);
+  tamanioYposicion(textTiempo,display_width,display_height,14,6,75,13,false);
+  tamanioYposicion(textGameOver,display_width,display_height,100,7,0,25,false);
+
   // * inicia los premios en su lugar
   utl.iniciarObjetos(premios,-0.075,0.05);
 
@@ -174,7 +178,22 @@ function aleratorioInt(min, max) {
   return Math.floor( Math.random() * (max - min) + min);
 }
 
-function tamanioYposicion(obj,wDispaly,hDisplay,wTamanio,hTamanio,wPosicion,hPosicion){
+
+
+/**
+  * La función establece el tamaño de respuesta y la posición de un objeto y 
+  * también puede esconderlo.
+  * @param obj - El objeto que necesita ser redimensionado y reposicionado.
+  * @param wDispaly - El ancho de la pantalla de visualización.
+  * @param hDisplay - La altura de la pantalla donde estará el objeto.
+  * @param wTamanio - tamaño del ancho del objeto
+  * @param hTamanio - El tamaño de la altura del objeto.
+  * @param wPosicion - La posición de ancho del objeto,posición horizontal.
+  * @param hPosicion - La posición de altura del objeto,posición vertical.
+  * @param oculto - Valor booleano que determina si el objeto debe estar oculto.
+  */
+function tamanioYposicion(obj,wDispaly,hDisplay,wTamanio,hTamanio,wPosicion,hPosicion,oculto){
   utl.estableceTamanioResponcivo(wDispaly,hDisplay,wTamanio,hTamanio,obj);
   utl.establecePosicionReponcivo(wDispaly,hDisplay,wPosicion,hPosicion,obj);
+  obj.hidden = oculto;
 }
