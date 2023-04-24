@@ -1,27 +1,6 @@
 const Reactive = require('Reactive');
-
-// function initBarraDeEstado(width,height,objetos_marcador,score,vidas){
-//     // * rectanguloTiempo tamaño
-//     objetos_marcador[0].width = (width*70)/100;
-//     objetos_marcador[0].height = (height*5)/100;
-//     // * rectanguloTiempo posición vertical y horizontal
-//     objetos_marcador[0].transform.position = Reactive.point((width*15)/100,(height*8)/100,0);
-//     // ! TODO: inicializar el texto de score
-//     // objetos_marcador[1].width = (width*70)/100;
-//     // objetos_marcador[1].height = (height*5)/100;
-//     objetos_marcador[1].transform.position = Reactive.point((width*12)/100,(height*13)/100,0);
-//     objetos_marcador[1].text = `Score: ${score}`;
-//     objetos_marcador[2].transform.position = Reactive.point((width*12)/100,(height*18)/100,0);
-//     objetos_marcador[2].text = `Vidas: ${vidas}`;
-//     // ! TODO: inicializar el texto de tiempo
-//     objetos_marcador[3].width = (width*50)/100;
-//     objetos_marcador[3].height = (height*5)/100;
-//     objetos_marcador[3].transform.position = Reactive.point((width*50)/100,(height*13)/100,0);
-//     objetos_marcador[3].text =`Tiempo: ${45}`;
-//     // ! ocultar game over
-//     objetos_marcador[4].hidden = true;
-//   }
-
+// mensajes en consola
+export const Diagnostics = require('Diagnostics');
 
 /**
  * Esta función establece el tamaño de respuesta de un objeto en función del
@@ -33,9 +12,9 @@ const Reactive = require('Reactive');
  * @param objeto - Objeto cuyo tamaño debe establecerse de forma receptiva.
  */
 export function estableceTamanioResponcivo(wDisplay,hDisplay,wRelativo,hRelativo,objeto){
-// tamaño
-objeto.width = (wDisplay*wRelativo)/100;
-objeto.height = (hDisplay*hRelativo)/100;
+    // tamaño
+    objeto.width = (wDisplay*wRelativo)/100;
+    objeto.height = (hDisplay*hRelativo)/100;
 }
 
 /**
@@ -50,8 +29,8 @@ objeto.height = (hDisplay*hRelativo)/100;
  * @param objeto - Objeto cuya posición es calculada
  */
 export function establecePosicionReponcivo(wDisplay,hDisplay,wRelativo,hRelativo,objeto){
-// posición
-objeto.transform.position = Reactive.point((wDisplay*wRelativo)/100,(hDisplay*hRelativo)/100);
+    // posición
+    objeto.transform.position = Reactive.point((wDisplay*wRelativo)/100,(hDisplay*hRelativo)/100,0);
 }
 
 /**
@@ -69,7 +48,6 @@ export function iniciarObjetos(objArray,inicio,sep){
       x+=sep;
     });
 }
-
 
 /**
  * La funcion detecta la colisión entre dos objetos y activa una consecuencia si

@@ -7,24 +7,23 @@ const FaceTracking = require('FaceTracking');
 // mensajes en consola
 export const Diagnostics = require('Diagnostics');
 // ? funciones de utils
-import {iniciarObjetos} from './utils.js';
+import * as utl from './utils.js';
+
+
 (async function () {  // Enables async/await in JS [part 1]
   // recuperamos los objetos de la scene
   // * NOTE: recuperar objetos de la scena. barra de tiempo
-  const objBarraTiempo = await Promise.all([
+  const [rectanguloTiempo,textScore,textVidas,textTiempo,textGameOver,
+    display,planeEscondite,pulseStar,pulseOO] = await Promise.all([
     Scene.root.findFirst('rectanguloTiempo'),
     Scene.root.findFirst('textScore'),
     Scene.root.findFirst('textVidas'),
     Scene.root.findFirst('textTiempo'),
-    Scene.root.findFirst('textGameOver'), 
-  ]);
-  // * NOTE: recuperar elementos y los pulsos para cambiar de estado
-  const [display,planeEscondite,
-      pulseStar,pulseOO] = await Promise.all([
-      Scene.root.findFirst('display'),
-      Scene.root.findFirst('escondite'),
-      Patches.outputs.getPulse('Star'),
-      Patches.outputs.getPulse('ocultarObjetos'),
+    Scene.root.findFirst('textGameOver'),
+    Scene.root.findFirst('display'),
+    Scene.root.findFirst('escondite'),
+    Patches.outputs.getPulse('Star'),
+    Patches.outputs.getPulse('ocultarObjetos'),
   ]);
   
   //*NOTE: Usu del canva display para optener el tamaño del dispositivo 
@@ -45,23 +44,18 @@ import {iniciarObjetos} from './utils.js';
   const castigos = await Scene.root.findByPath("**/bad*");
 
   //*NOTE: inicializar la barra de tiempo 
-  initBarraDeEstado(display_width,display_height,objBarraTiempo,score,vidas);
+  tamanioYposicion(rectanguloTiempo,display_width,display_height,80,6,10,8);
+  // rectanguloTiempo.hidden = false;
+  // * inicia los premios en su lugar
+  utl.iniciarObjetos(premios,-0.075,0.05);
 
-  // * inicia los premies en su lugar
-  iniciarObjetos(premios,-0.075,0.05);
-
-  // 
-
-
-
-  
   // *modifica el rectangulo
-  function iniciar(){
-    animarBarraDeTiempo(objBarraTiempo[0],objBarraTiempo[3]);
-    for (let i = 0; i < premios.length; i++) {
-      animar(premios[i]);
-    }
-  }
+  // function iniciar(){
+  //   animarBarraDeTiempo(objBarraTiempo[0],objBarraTiempo[3]);
+  //   for (let i = 0; i < premios.length; i++) {
+  //     animar(premios[i]);
+  //   }
+  // }
 
   // ! elige
   function animar(good){
@@ -92,8 +86,8 @@ import {iniciarObjetos} from './utils.js';
   }
   
   // * si pulso la pantalla inicia
-  pulseStar.subscribe(iniciar);
-  pulseOO.subscribe(ocultar);
+  // pulseStar.subscribe(iniciar);
+  // pulseOO.subscribe(ocultar);
 })(); // Enables async/await in JS [part 2]
 
 function initBarraDeEstado(width,height,objetos_marcador,score,vidas){
@@ -178,4 +172,9 @@ function animarTecuiche(tecuiche,barra){
 
 function aleratorioInt(min, max) {
   return Math.floor( Math.random() * (max - min) + min);
+}
+
+function tamanioYposicion(obj,wDispaly,hDisplay,wTamanio,hTamanio,wPosicion,hPosicion){
+  utl.estableceTamanioResponcivo(wDispaly,hDisplay,wTamanio,hTamanio,obj);
+  utl.establecePosicionReponcivo(wDispaly,hDisplay,wPosicion,hPosicion,obj);
 }
