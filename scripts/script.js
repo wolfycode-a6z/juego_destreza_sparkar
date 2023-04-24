@@ -56,17 +56,10 @@ import * as utl from './utils.js';
 
   // FIXME: inicia las animaciones
   function comenzarJuego(){
-    // controlador del timpo
-    const paramDriveTiempo = {
-      // La duración del controlador
-      durationMilliseconds: tiempo*1000,
-      // numero de iteraciones
-      loopCount: 1,
-      // si es de ida y de vuelta
-      mirror: false
-    };
-    rectanguloTiempo.width = utl.animacionLineal(paramDriveTiempo,rectanguloTiempo.width.pinLastValue(),0);
-    const animacionTiempo = utl.animacionLineal(paramDriveTiempo,tiempo,0);
+    const controladorTiempo = creaControladorTiempo(tiempo);
+
+    rectanguloTiempo.width = utl.animacionLineal(controladorTiempo,rectanguloTiempo.width.pinLastValue(),0);
+    const animacionTiempo = utl.animacionLineal(controladorTiempo,tiempo,0);
     Diagnostics.watch("Time:", animacionTiempo);
     animacionTiempo.monitor().subscribe(()=>{
       textTiempo.text = animacionTiempo.round().pinLastValue()+" s";
@@ -162,4 +155,22 @@ function tamanioYposicion(obj,wDispaly,hDisplay,wTamanio,hTamanio,wPosicion,hPos
   utl.estableceTamanioResponcivo(wDispaly,hDisplay,wTamanio,hTamanio,obj);
   utl.establecePosicionReponcivo(wDispaly,hDisplay,wPosicion,hPosicion,obj);
   obj.hidden = oculto;
+}
+
+function creaControladorTiempo(tiempo,repeticiones=1,espejo=false,
+  aleatorio=false,min=0,max=0){
+
+  if(aleatorio || tiempo<0){
+    tiempo = aleratorioInt(min,max);
+  }
+
+  const controlador = {
+    // La duración del controlador
+    durationMilliseconds: tiempo*1000,
+    // numero de iteraciones
+    loopCount: 1,
+    // si es de ida y de vuelta
+    mirror: false
+  }
+  return controlador;
 }

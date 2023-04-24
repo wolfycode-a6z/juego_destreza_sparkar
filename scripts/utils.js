@@ -100,6 +100,43 @@ export function animacionLineal(controladorTiempo,inicio,final){
     return animacionRectangulo;
 }
 
+
+
+/**
+  * La función crea un objeto controlador de tiempo con duración personalizable, número
+  * de iteraciones, duplicación y aleatorización opcional.
+  * @param tiempo - La duración del controlador en segundos.
+  * @param [repeticiones=1] - La cantidad de veces que el controlador debe repetir su
+  * animación. Si no se especifica.
+  * @param [espejo=false] - un valor booleano que determina si la animación
+  * debe jugar al revés después de completar un ciclo. Si se establece en verdadero, la animación
+  * reproducirá hacia adelante y luego hacia atrás. Si se establece en falso, la animación solo
+  * jugar hacia adelante.
+  * @param [aleatorio=false] - un valor booleano que determina si la duración
+  * del controlador debe ser aleatorio o no. Si se establece en verdadero, la duración
+  * debe ser un número entero aleatorio entre los valores de los parámetros min y max.
+  * @param [min=0] - El valor mínimo para la generación de tiempo aleatorio. 
+  * @param [max=0] - El valor máximo para la generación de tiempo aleatorio.
+  * @returns La función `creaControladorTiempo` devuelve un objeto con propiedades
+  * `durationMilliseconds`, `loopCount` y `mirror`.
+  */
+export function creaControladorTiempo(tiempo,repeticiones=1,espejo=false,
+                                        aleatorio=false,min=0,max=0){
+    if(aleatorio || tiempo<0){
+      tiempo = aleratorioInt(min,max);
+    }
+  
+    const controlador = {
+      // La duración del controlador
+      durationMilliseconds: tiempo*1000,
+      // numero de iteraciones
+      loopCount: repeticiones,
+      // si es de ida y de vuelta
+      mirror: espejo
+    }
+    return controlador;
+}
+
 // function animacionLineal(controladorTiempo,inicio,final){
 //     // controlador de tiempo
 //     const driverTiempo = Animation.timeDriver(controladorTiempo);
