@@ -44,34 +44,16 @@ import {iniciarObjetos} from './utils.js';
   //*NOTE: Recupera objetos castigo
   const castigos = await Scene.root.findByPath("**/bad*");
 
+  //*NOTE: inicializar la barra de tiempo 
+  initBarraDeEstado(display_width,display_height,objBarraTiempo,score,vidas);
+
   // * inicia los premies en su lugar
   iniciarObjetos(premios,-0.075,0.05);
 
+  // 
 
-  // TODO: falta progrmar las coliciones
-  // ! aqui empieza
-  function chocaron(tecuich){
-    const n = parseInt((tecuich.name[tecuich.name.length - 1]));
-    const tolerancia = 0.03;
-    const esconditeX = planeEscondite.transform.x;
-    const esconditeY = planeEscondite.transform.y;
-    const tecuichX = tecuich.transform.x;
-    const tecuichY = tecuich.transform.y;
-    const chocaronX = esconditeX.sub(tecuichX).abs();
-    const chocaronY = esconditeY.sub(tecuichY).abs();
-    chocaronX.lt(tolerancia).and(chocaronY.lt(tolerancia)).onOn().subscribe(()=>{
-      if(tecuich.name.includes("tecuich")){
-        Diagnostics.log(`Soy ${tecuich.name} y aumento score`);
-        incrementaScore(tecuich,n);
-      }else{
-        Diagnostics.log(`Soy ${tecuich.name} y disminuyo vidas`);
-        incrementaScore(tecuich,n);
-      }
-    });
-  }
 
-  // *inicializar 
-  initBarraDeEstado(display_width,display_height,objBarraTiempo,score,vidas);
+
   
   // *modifica el rectangulo
   function iniciar(){
