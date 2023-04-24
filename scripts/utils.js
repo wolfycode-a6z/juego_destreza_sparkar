@@ -1,4 +1,5 @@
 const Reactive = require('Reactive');
+const Animation = require('Animation');
 // mensajes en consola
 export const Diagnostics = require('Diagnostics');
 
@@ -73,4 +74,48 @@ export function colisionDosObj(obj1,obj2,tolerancia,consecuencia){
         consecuencia();
     });
     return n;
-  }
+}
+
+
+/**
+  * Esta función crea una animación lineal utilizando un controlador de tiempo, 
+  * inicio y final.
+  * @param controladorTiempo - Un controlador de tiempo que controla la duración
+  * repeticiones y el efecto espejo de la animación.
+  * @param inicio - El valor inicial de la animación. Este es el valor que el
+  * la animación comenzará y cambiará con el tiempo hasta llegar al final
+  * valor.
+  * @param final - El valor final que alcanzará la animación.
+  * @returns La función `animacionLineal` devuelve un objeto de animación que es
+  * creado mediante la combinación de un controlador de tiempo y un muestreador lineal.
+  */
+export function animacionLineal(controladorTiempo,inicio,final){
+    // controlador de tiempo
+    const driverTiempo = Animation.timeDriver(controladorTiempo);
+    driverTiempo.start();
+    // crear muestra de la animación - lineal
+    const muestraBase = Animation.samplers.linear(inicio,final);
+    // creamos una animación conbinando el controlador y la muestra
+    const animacionRectangulo = Animation.animate(driverTiempo,muestraBase);
+    return animacionRectangulo;
+}
+
+// function animacionLineal(controladorTiempo,inicio,final){
+//     // controlador de tiempo
+//     const driverTiempo = Animation.timeDriver(controladorTiempo);
+//     driverTiempo.start();
+//     // crear muestra de la animación - lineal
+//     const muestraBase = Animation.samplers.linear(inicio,final);
+//     // const muestraBaseTiempo = Animation.samplers.linear(45,0);
+//     // creamos una animación conbinando el controlador y la muestra
+//     const animacionRectangulo = Animation.animate(driverTiempo,muestraBase);
+//     // const animacionTiempo = Animation.animate(driverTiempo,muestraBaseTiempo);
+//     return animacionRectangulo;
+//     // cambiamos el valor que queremos animar
+//     // rectangulo.width = animacionRectangulo;
+//     // animacionTiempo.monitor().subscribe(()=>{
+//     //   tiempo.text = "Tiempo " + animacionTiempo.round().pinLastValue();
+//     // })
+//     // mandamos un pulso a la función que esta suscrita cuando termine la animación
+//     // Patches.inputs.setPulse('GameOver',driverTiempo.onCompleted());
+// }

@@ -30,11 +30,7 @@ import * as utl from './utils.js';
   const display_width = display.width.pinLastValue();
   const display_height = display.height.pinLastValue();
 
-  // *NOTE: Inicio de variables 
-  let score = 0;
-  let vidas = 3;
-
-  //*NOTE: Que el escondite siga el rostro
+  //*NOTE: Que el planeEscondite siga el rostro
   planeEscondite.transform.x = FaceTracking.face(0).cameraTransform.position.x;
   planeEscondite.transform.y = FaceTracking.face(0).cameraTransform.position.y;
 
@@ -43,23 +39,46 @@ import * as utl from './utils.js';
   //*NOTE: Recupera objetos castigo
   const castigos = await Scene.root.findByPath("**/bad*");
 
-  //*NOTE: inicializar la barra de tiempo 
+  //*NOTE: inicializar objetos de la barra de tiempo 
   tamanioYposicion(rectanguloTiempo,display_width,display_height,80,6,10,8,false);
   tamanioYposicion(textScore,display_width,display_height,37,6,10,13,false);
   tamanioYposicion(textVidas,display_width,display_height,37,6,10,16,false);
   tamanioYposicion(textTiempo,display_width,display_height,14,6,75,13,false);
-  tamanioYposicion(textGameOver,display_width,display_height,100,7,0,25,false);
+  tamanioYposicion(textGameOver,display_width,display_height,100,7,0,25,true);
 
-  // * inicia los premios en su lugar
+  //* NOTE: inicia los premios en su lugar
   utl.iniciarObjetos(premios,-0.075,0.05);
+  
+  //* NOTE: Inicio de variables clave del juego
+  let tiempo = 10;
+  let score = 0;
+  let vidas = 3;
 
-  // *modifica el rectangulo
-  // function iniciar(){
-  //   animarBarraDeTiempo(objBarraTiempo[0],objBarraTiempo[3]);
-  //   for (let i = 0; i < premios.length; i++) {
-  //     animar(premios[i]);
-  //   }
-  // }
+  // FIXME: inicia las animaciones
+  function comenzarJuego(){
+    // controlador del timpo
+    const paramDriveTiempo = {
+      // La duración del controlador
+      durationMilliseconds: tiempo*1000,
+      // numero de iteraciones
+      loopCount: 1,
+      // si es de ida y de vuelta
+      mirror: false
+    };
+    rectanguloTiempo.width = utl.animacionLineal(paramDriveTiempo,rectanguloTiempo.width.pinLastValue(),0);
+    const animacionTiempo = utl.animacionLineal(paramDriveTiempo,tiempo,0);
+    Diagnostics.watch("Time:", animacionTiempo);
+    animacionTiempo.monitor().subscribe(()=>{
+      textTiempo.text = animacionTiempo.round().pinLastValue()+" s";
+    });
+    animacionTiempo.eq(0).onOn().subscribe(()=>{
+      rectanguloTiempo.hidden = true;
+      textVidas.hidden = true;
+      textScore.hidden = true;
+      textTiempo.hidden = true;
+      textGameOver.hidden = false;
+    });
+  }
 
   // ! elige
   function animar(good){
@@ -90,63 +109,10 @@ import * as utl from './utils.js';
   }
   
   // * si pulso la pantalla inicia
-  // pulseStar.subscribe(iniciar);
+  pulseStar.subscribe(comenzarJuego);
   // pulseOO.subscribe(ocultar);
 })(); // Enables async/await in JS [part 2]
 
-function initBarraDeEstado(width,height,objetos_marcador,score,vidas){
-  // * rectanguloTiempo tamaño
-  objetos_marcador[0].width = (width*70)/100;
-  objetos_marcador[0].height = (height*5)/100;
-  // * rectanguloTiempo posición vertical y horizontal
-  objetos_marcador[0].transform.position = Reactive.point((width*15)/100,(height*8)/100,0);
-  // ! TODO: inicializar el texto de score
-  // objetos_marcador[1].width = (width*70)/100;
-  // objetos_marcador[1].height = (height*5)/100;
-  objetos_marcador[1].transform.position = Reactive.point((width*12)/100,(height*13)/100,0);
-  objetos_marcador[1].text = `Score: ${score}`;
-  objetos_marcador[2].transform.position = Reactive.point((width*12)/100,(height*18)/100,0);
-  objetos_marcador[2].text = `Vidas: ${vidas}`;
-  // ! TODO: inicializar el texto de tiempo
-  objetos_marcador[3].width = (width*50)/100;
-  objetos_marcador[3].height = (height*5)/100;
-  objetos_marcador[3].transform.position = Reactive.point((width*50)/100,(height*13)/100,0);
-  objetos_marcador[3].text =`Tiempo: ${45}`;
-  // ! ocultar game over
-  objetos_marcador[4].hidden = true;
-}
-
-function animarBarraDeTiempo(rectangulo,tiempo){
-  // !Animación Crear un conjunto de parámetros de controlador de tiempo
-  const paramDriveTiempo = {
-    // La duración del controlador
-    durationMilliseconds: 45000,
-    // numero de iteraciones
-    loopCount: 1,
-    // si es de ida y de vuelta
-    mirror: false
-  };
-
-  // controlador de tiempo
-  const driverTiempo = Animation.timeDriver(paramDriveTiempo);
-  driverTiempo.start();
-  
-  // crear muestra de la animación - lineal
-  const muestraBase = Animation.samplers.linear(rectangulo.width.pinLastValue(),0);
-  const muestraBaseTiempo = Animation.samplers.linear(45,0);
-
-  // creamos una animación conbinando el controlador y la muestra
-  const animacionRectangulo = Animation.animate(driverTiempo,muestraBase);
-  const animacionTiempo = Animation.animate(driverTiempo,muestraBaseTiempo);
-
-  // cambiamos el valor que queremos animar
-  rectangulo.width = animacionRectangulo;
-  animacionTiempo.monitor().subscribe(()=>{
-    tiempo.text = "Tiempo " + animacionTiempo.round().pinLastValue();
-  })
-  // mandamos un pulso a la función que esta suscrita cuando termine la animación
-  Patches.inputs.setPulse('GameOver',driverTiempo.onCompleted());
-}
 
 function animarTecuiche(tecuiche,barra){
   const tiempo = aleratorioInt(20,80) * 100;
