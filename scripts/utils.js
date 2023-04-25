@@ -71,7 +71,7 @@ export function colisionDosObj(obj1,obj2,tolerancia,consecuencia){
     const colisionX = obj2X.sub(obj1X).abs();
     const colisionY = obj2Y.sub(obj1Y).abs();
     colisionX.lt(tolerancia).and(colisionY.lt(tolerancia)).onOn().subscribe(()=>{
-        consecuencia();
+        consecuencia(obj1);
     });
     return n;
 }
@@ -96,14 +96,15 @@ export function animacionLineal(controladorTiempo,inicio,final,observar=null){
     // crear muestra de la animación - lineal
     const muestraBase = Animation.samplers.linear(inicio,final);
     // creamos una animación conbinando el controlador y la muestra
-    const animacionRectangulo = Animation.animate(driverTiempo,muestraBase);
+    const animacion = Animation.animate(driverTiempo,muestraBase);
     if(observar){
       observar.eq(0).onOn().subscribe(()=>{
         driverTiempo.stop();
         Diagnostics.log("Termine hdtpm");
       });
+      return [animacion,driverTiempo];
     }
-    return animacionRectangulo;
+    return animacion;
 }
 
 /**

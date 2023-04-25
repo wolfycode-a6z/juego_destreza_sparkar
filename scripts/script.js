@@ -51,7 +51,7 @@ import * as utl from './utils.js';
   utl.iniciarObjetos(premios,-0.075,0.05);
   
   //* NOTE: Inicio de variables clave del juego
-  let tiempo = 10;
+  let tiempo = 45;
   let score = 0;
   let vidas = 3;
 
@@ -69,12 +69,8 @@ import * as utl from './utils.js';
       textTiempo.text = animacionTiempo.round().pinLastValue()+" s";
     });
 
-    // !animar los premios - agregar las coliciones
-    let ap = animarPremio(premios[0],0.23,-0.23,animacionTiempo);
-    utl.colisionDosObj(premios[0],planeEscondite,0.03,incrementaScore);
-    premios[0].transform.position.y.lt(-0.23).onOn().subscribe(()=>{
-        ap = animarPremio(premios[0],0.23,-0.23,animacionTiempo);
-    });
+    // * animar los premios - agregar las coliciones
+    animacionPremios(premios,planeEscondite,incrementaScore,animacionTiempo);
 
     // si el tiempo termina muestra gameOver
     animacionTiempo.eq(0).onOn().subscribe(()=>{
@@ -83,7 +79,9 @@ import * as utl from './utils.js';
       textScore.hidden = true;
       textTiempo.hidden = true;
       textGameOver.hidden = false;
-      premios[0].hidden = false;
+      premios.forEach((p)=>{
+        p.hidden = true;
+      })
     });
 
   }
@@ -109,10 +107,10 @@ import * as utl from './utils.js';
     vidas--;
   }
 
-  function incrementaScore(){
+  function incrementaScore(premio){
+    premio.hidden = true;
     score++;
     textScore.text = `Score: ${score}`;
-
   }
   
   // * si pulso la pantalla inicia
@@ -164,9 +162,21 @@ function tamanioYposicion(obj,wDispaly,hDisplay,wTamanio,hTamanio,wPosicion,hPos
   obj.hidden = oculto;
 }
 
-function animarPremio(premio,inicio,final,observar=null){
+function creaAnimacionPremio(premio,inicio,final,observar=null){
   const driveTiempo = utl.creaControladorTiempo(0,1,false,true,20,80);
   const animacion = utl.animacionLineal(driveTiempo,inicio,final,observar);
-  premio.transform.position = Reactive.point(-0.075,animacion,0);
-  return animacion;
+  premio.transform.position = Reactive.point(premio.transform.position.x.pinLastValue(),animacion[0],0);
+  return animacion[1];
+}
+
+function animacionPremios(premios,colicion,consecuencia,observar){
+  premios.forEach((p)=>{
+    let ap = creaAnimacionPremio(p,0.23,-0.23,observar);
+    utl.colisionDosObj(p,colicion,0.03,consecuencia);
+    p.transform.position.y.lt(-0.23).onOn().subscribe(()=>{
+        ap.stop();
+        p.hidden = false;
+        ap = creaAnimacionPremio(p,0.23,-0.23,observar);
+    });
+  });
 }
