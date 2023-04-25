@@ -77,7 +77,7 @@ export function colisionDosObj(obj1,obj2,tolerancia,consecuencia){
 }
 
 
-/**
+/**TODO:modificar por nuevo parametro
   * Esta función crea una animación lineal utilizando un controlador de tiempo, 
   * inicio y final.
   * @param controladorTiempo - Un controlador de tiempo que controla la duración
@@ -89,7 +89,7 @@ export function colisionDosObj(obj1,obj2,tolerancia,consecuencia){
   * @returns La función `animacionLineal` devuelve un objeto de animación que es
   * creado mediante la combinación de un controlador de tiempo y un muestreador lineal.
   */
-export function animacionLineal(controladorTiempo,inicio,final){
+export function animacionLineal(controladorTiempo,inicio,final,observar=null){
     // controlador de tiempo
     const driverTiempo = Animation.timeDriver(controladorTiempo);
     driverTiempo.start();
@@ -97,10 +97,14 @@ export function animacionLineal(controladorTiempo,inicio,final){
     const muestraBase = Animation.samplers.linear(inicio,final);
     // creamos una animación conbinando el controlador y la muestra
     const animacionRectangulo = Animation.animate(driverTiempo,muestraBase);
+    if(observar){
+      observar.eq(0).onOn().subscribe(()=>{
+        driverTiempo.stop();
+        Diagnostics.log("Termine hdtpm");
+      });
+    }
     return animacionRectangulo;
 }
-
-
 
 /**
   * La función crea un objeto controlador de tiempo con duración personalizable, número
@@ -123,9 +127,8 @@ export function animacionLineal(controladorTiempo,inicio,final){
 export function creaControladorTiempo(tiempo,repeticiones=1,espejo=false,
                                         aleatorio=false,min=0,max=0){
     if(aleatorio || tiempo<0){
-      tiempo = aleratorioInt(min,max);
+      tiempo = aleratorioInt(min,max)/10;
     }
-  
     const controlador = {
       // La duración del controlador
       durationMilliseconds: tiempo*1000,
@@ -137,6 +140,9 @@ export function creaControladorTiempo(tiempo,repeticiones=1,espejo=false,
     return controlador;
 }
 
+export function aleratorioInt(min, max) {
+    return Math.floor( Math.random() * (max - min) + min);
+}
 // function animacionLineal(controladorTiempo,inicio,final){
 //     // controlador de tiempo
 //     const driverTiempo = Animation.timeDriver(controladorTiempo);

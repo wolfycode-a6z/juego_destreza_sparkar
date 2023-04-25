@@ -6,6 +6,7 @@ const Animation = require('Animation');
 const FaceTracking = require('FaceTracking');
 // mensajes en consola
 export const Diagnostics = require('Diagnostics');
+import SceneModule from 'Scene';
 // ? funciones de utils
 import * as utl from './utils.js';
 
@@ -56,21 +57,35 @@ import * as utl from './utils.js';
 
   // FIXME: inicia las animaciones
   function comenzarJuego(){
-    const controladorTiempo = creaControladorTiempo(tiempo);
-
+    // crea un controlado
+    const controladorTiempo = utl.creaControladorTiempo(tiempo);
+    // animación lineal a lo ancho
     rectanguloTiempo.width = utl.animacionLineal(controladorTiempo,rectanguloTiempo.width.pinLastValue(),0);
+    // animación dle tiempo
     const animacionTiempo = utl.animacionLineal(controladorTiempo,tiempo,0);
-    Diagnostics.watch("Time:", animacionTiempo);
+
+    // actualiza el tiempo en pantalla
     animacionTiempo.monitor().subscribe(()=>{
       textTiempo.text = animacionTiempo.round().pinLastValue()+" s";
     });
+
+    // !animar los premios - agregar las coliciones
+    let ap = animarPremio(premios[0],0.23,-0.23,animacionTiempo);
+    utl.colisionDosObj(premios[0],planeEscondite,0.03,incrementaScore);
+    premios[0].transform.position.y.lt(-0.23).onOn().subscribe(()=>{
+        ap = animarPremio(premios[0],0.23,-0.23,animacionTiempo);
+    });
+
+    // si el tiempo termina muestra gameOver
     animacionTiempo.eq(0).onOn().subscribe(()=>{
       rectanguloTiempo.hidden = true;
       textVidas.hidden = true;
       textScore.hidden = true;
       textTiempo.hidden = true;
       textGameOver.hidden = false;
+      premios[0].hidden = false;
     });
+
   }
 
   // ! elige
@@ -94,11 +109,10 @@ import * as utl from './utils.js';
     vidas--;
   }
 
-  function incrementaScore(tecuich,n){
-    tecuich.hidden = true;
+  function incrementaScore(){
     score++;
-    objBarraTiempo[1].text = `Score: ${score}`;
-    animar(premios[n]);
+    textScore.text = `Score: ${score}`;
+
   }
   
   // * si pulso la pantalla inicia
@@ -122,7 +136,6 @@ function animarTecuiche(tecuiche,barra){
       
   const baseSampler = Animation.samplers.linear(y,-y);
   const baseAnimation = Animation.animate(baseDriver,baseSampler);
-  
   barra.width.eq(0).onOn().subscribe(()=>{
     baseDriver.stop();
     Diagnostics.log(" ya no")
@@ -132,12 +145,6 @@ function animarTecuiche(tecuiche,barra){
     baseDriver.stop();
   });
 }
-
-function aleratorioInt(min, max) {
-  return Math.floor( Math.random() * (max - min) + min);
-}
-
-
 
 /**
   * La función establece el tamaño de respuesta y la posición de un objeto y 
@@ -157,20 +164,9 @@ function tamanioYposicion(obj,wDispaly,hDisplay,wTamanio,hTamanio,wPosicion,hPos
   obj.hidden = oculto;
 }
 
-function creaControladorTiempo(tiempo,repeticiones=1,espejo=false,
-  aleatorio=false,min=0,max=0){
-
-  if(aleatorio || tiempo<0){
-    tiempo = aleratorioInt(min,max);
-  }
-
-  const controlador = {
-    // La duración del controlador
-    durationMilliseconds: tiempo*1000,
-    // numero de iteraciones
-    loopCount: 1,
-    // si es de ida y de vuelta
-    mirror: false
-  }
-  return controlador;
+function animarPremio(premio,inicio,final,observar=null){
+  const driveTiempo = utl.creaControladorTiempo(0,1,false,true,20,80);
+  const animacion = utl.animacionLineal(driveTiempo,inicio,final,observar);
+  premio.transform.position = Reactive.point(-0.075,animacion,0);
+  return animacion;
 }
