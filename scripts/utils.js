@@ -100,11 +100,46 @@ export function animacionLineal(controladorTiempo,inicio,final,observar=null){
     if(observar){
       observar.eq(0).onOn().subscribe(()=>{
         driverTiempo.stop();
-        Diagnostics.log("Termine hdtpm");
       });
       return [animacion,driverTiempo];
     }
     return animacion;
+}
+
+function creaAnimacionPremio(premio,inicio,final,observar=null){
+  premio.hidden = false;
+  const driveTiempo = creaControladorTiempo(0,1,false,true,20,80);
+  const animacion = animacionLineal(driveTiempo,inicio,final,observar);
+  premio.transform.position = Reactive.point(premio.transform.position.x.pinLastValue(),animacion[0],0);
+  return animacion[1];
+}
+
+export function animacionPremios(premios,castigos,observar){
+  premios.forEach((p,i)=>{
+    prueba(p,castigos[i],observar);
+  });
+}
+
+function prueba(premio,castigo,observar){
+  var cont = 1;
+  if(Math.random()>0.9){
+    var item = premio;
+    Diagnostics.log("Soy bueno");
+  }else{
+    var item = castigo;
+    Diagnostics.log("Soy malo");
+  }
+  const ap = creaAnimacionPremio(item,0.23,-0.23,observar);
+  item.transform.position.y.lt(-0.23).or(observar.eq(0)).onOn().subscribe(()=>{
+    ap.stop();
+    prueba(premio,castigo,observar);
+  });
+}
+
+export function iniciaColiciones(premios,colicion,consecuencia,tolerancia){
+  premios.forEach((p)=>{
+    colisionDosObj(p,colicion,tolerancia,consecuencia);
+  });
 }
 
 /**
@@ -144,22 +179,3 @@ export function creaControladorTiempo(tiempo,repeticiones=1,espejo=false,
 export function aleratorioInt(min, max) {
     return Math.floor( Math.random() * (max - min) + min);
 }
-// function animacionLineal(controladorTiempo,inicio,final){
-//     // controlador de tiempo
-//     const driverTiempo = Animation.timeDriver(controladorTiempo);
-//     driverTiempo.start();
-//     // crear muestra de la animación - lineal
-//     const muestraBase = Animation.samplers.linear(inicio,final);
-//     // const muestraBaseTiempo = Animation.samplers.linear(45,0);
-//     // creamos una animación conbinando el controlador y la muestra
-//     const animacionRectangulo = Animation.animate(driverTiempo,muestraBase);
-//     // const animacionTiempo = Animation.animate(driverTiempo,muestraBaseTiempo);
-//     return animacionRectangulo;
-//     // cambiamos el valor que queremos animar
-//     // rectangulo.width = animacionRectangulo;
-//     // animacionTiempo.monitor().subscribe(()=>{
-//     //   tiempo.text = "Tiempo " + animacionTiempo.round().pinLastValue();
-//     // })
-//     // mandamos un pulso a la función que esta suscrita cuando termine la animación
-//     // Patches.inputs.setPulse('GameOver',driverTiempo.onCompleted());
-// }

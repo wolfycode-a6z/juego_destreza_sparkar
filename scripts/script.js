@@ -9,6 +9,7 @@ export const Diagnostics = require('Diagnostics');
 import SceneModule from 'Scene';
 // ? funciones de utils
 import * as utl from './utils.js';
+import { relative } from 'path';
 
 
 (async function () {  // Enables async/await in JS [part 1]
@@ -51,9 +52,9 @@ import * as utl from './utils.js';
   utl.iniciarObjetos(premios,-0.075,0.05);
   
   //* NOTE: Inicio de variables clave del juego
-  let tiempo = 45;
+  let tiempo = 30;
   let score = 0;
-  let vidas = 3;
+  const vidas = Reactive.val(3);
 
   // FIXME: inicia las animaciones
   function comenzarJuego(){
@@ -61,19 +62,24 @@ import * as utl from './utils.js';
     const controladorTiempo = utl.creaControladorTiempo(tiempo);
     // animación lineal a lo ancho
     rectanguloTiempo.width = utl.animacionLineal(controladorTiempo,rectanguloTiempo.width.pinLastValue(),0);
+    
     // animación dle tiempo
     const animacionTiempo = utl.animacionLineal(controladorTiempo,tiempo,0);
-
     // actualiza el tiempo en pantalla
     animacionTiempo.monitor().subscribe(()=>{
       textTiempo.text = animacionTiempo.round().pinLastValue()+" s";
     });
 
     // * animar los premios - agregar las coliciones
-    animacionPremios(premios,planeEscondite,incrementaScore,animacionTiempo);
+    utl.iniciaColiciones(premios,planeEscondite,incrementaScore,0.03);
+    utl.iniciaColiciones(castigos,planeEscondite,quitarVidas,0.03);
 
+    utl.animacionPremios(premios,castigos,animacionTiempo);
+    vidas.sub(1);
+    vidas.sub(1);
+    Diagnostics.watch("vidas: ",vidas);
     // si el tiempo termina muestra gameOver
-    animacionTiempo.eq(0).onOn().subscribe(()=>{
+    animacionTiempo.eq(0).or(vidas.eq(0)).onOn().subscribe(()=>{
       rectanguloTiempo.hidden = true;
       textVidas.hidden = true;
       textScore.hidden = true;
@@ -81,30 +87,18 @@ import * as utl from './utils.js';
       textGameOver.hidden = false;
       premios.forEach((p)=>{
         p.hidden = true;
-      })
+      });
+      castigos.forEach((c)=>{
+        c.hidden = true;
+      });
     });
 
   }
 
-  // ! elige
-  function animar(good){
-    animarTecuiche(good,objBarraTiempo[0]);
-  }
-
-  // * oculata los objetos cuando termina el tiempo
-  function ocultar(){
-    Diagnostics.log("ya termine perro");
-    objBarraTiempo.forEach(function(objeto){
-      objeto.hidden = true;
-    });
-    premios.forEach(function(tecuich){
-      tecuich.hidden = true;
-    })
-    objBarraTiempo[3].hidden = false;
-  }
-  
-  function quitarVidas(vidas){
-    vidas--;
+  function quitarVidas(castigo){
+    castigo.hidden = true;
+    vidas.sum(-1);
+    textVidas.text = `Vidas: ${vidas.pinLastValue()}`;
   }
 
   function incrementaScore(premio){
@@ -160,23 +154,4 @@ function tamanioYposicion(obj,wDispaly,hDisplay,wTamanio,hTamanio,wPosicion,hPos
   utl.estableceTamanioResponcivo(wDispaly,hDisplay,wTamanio,hTamanio,obj);
   utl.establecePosicionReponcivo(wDispaly,hDisplay,wPosicion,hPosicion,obj);
   obj.hidden = oculto;
-}
-
-function creaAnimacionPremio(premio,inicio,final,observar=null){
-  const driveTiempo = utl.creaControladorTiempo(0,1,false,true,20,80);
-  const animacion = utl.animacionLineal(driveTiempo,inicio,final,observar);
-  premio.transform.position = Reactive.point(premio.transform.position.x.pinLastValue(),animacion[0],0);
-  return animacion[1];
-}
-
-function animacionPremios(premios,colicion,consecuencia,observar){
-  premios.forEach((p)=>{
-    let ap = creaAnimacionPremio(p,0.23,-0.23,observar);
-    utl.colisionDosObj(p,colicion,0.03,consecuencia);
-    p.transform.position.y.lt(-0.23).onOn().subscribe(()=>{
-        ap.stop();
-        p.hidden = false;
-        ap = creaAnimacionPremio(p,0.23,-0.23,observar);
-    });
-  });
 }
