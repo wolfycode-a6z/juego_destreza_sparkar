@@ -45,6 +45,7 @@ export function establecePosicionReponcivo(wDisplay,hDisplay,wRelativo,hRelativo
 export function iniciarObjetos(objArray,inicio,sep){
     let x = inicio
     objArray.forEach((obj)=>{
+      obj.hidden = true;
       obj.transform.position = Reactive.point(x,0.23,0);
       x+=sep;
     });
@@ -77,90 +78,83 @@ export function colisionDosObj(obj1,obj2,tolerancia,consecuencia){
 }
 
 
-/**TODO:modificar por nuevo parametro
-  * Esta función crea una animación lineal utilizando un controlador de tiempo, 
-  * inicio y final.
-  * @param controladorTiempo - Un controlador de tiempo que controla la duración
-  * repeticiones y el efecto espejo de la animación.
-  * @param inicio - El valor inicial de la animación. Este es el valor que el
-  * la animación comenzará y cambiará con el tiempo hasta llegar al final
-  * valor.
-  * @param final - El valor final que alcanzará la animación.
-  * @returns La función `animacionLineal` devuelve un objeto de animación que es
-  * creado mediante la combinación de un controlador de tiempo y un muestreador lineal.
-  */
-export function animacionLineal(controladorTiempo,inicio,final,observar=null){
+// TODO: documenar
+export function animacionLineal(controladorTiempo,inicio,final){
     // controlador de tiempo
     const driverTiempo = Animation.timeDriver(controladorTiempo);
-    driverTiempo.start();
     // crear muestra de la animación - lineal
     const muestraBase = Animation.samplers.linear(inicio,final);
     // creamos una animación conbinando el controlador y la muestra
     const animacion = Animation.animate(driverTiempo,muestraBase);
-    if(observar){
-      observar.eq(0).onOn().subscribe(()=>{
-        driverTiempo.stop();
-      });
-      return [animacion,driverTiempo];
-    }
-    return animacion;
+    return [driverTiempo,animacion];
 }
 
-function creaAnimacionPremio(premio,inicio,final,observar=null){
+// TODO: documenar
+function creaAnimacionPremio(premio,inicio,final){
   premio.hidden = false;
-  const driveTiempo = creaControladorTiempo(0,1,false,true,20,80);
-  const animacion = animacionLineal(driveTiempo,inicio,final,observar);
-  premio.transform.position = Reactive.point(premio.transform.position.x.pinLastValue(),animacion[0],0);
-  return animacion[1];
+  // FIXME: velocidad
+  const driveTiempo = creaControladorTiempo(0,1,false,true,30,90);
+  const animacion = animacionLineal(driveTiempo,inicio,final);
+  premio.transform.position = Reactive.point(premio.transform.position.x.pinLastValue(),animacion[1],0);
+  return animacion[0];
 }
 
-export function animacionPremios(premios,castigos,observar){
+// TODO: documentar
+export function animacionPremios(premios,castigos,probabilidad,observar){
   premios.forEach((p,i)=>{
-    prueba(p,castigos[i],observar);
+    animarPremios(p,castigos[i],probabilidad,observar);
   });
 }
 
-function prueba(premio,castigo,observar){
-  const paramProbabilidad = 0.2;
-  var cont = 1;
-  if(cont%2==0){
+// TODO: documentar
+function animarPremios(premio,castigo,paramProbabilidad,observar){
+  const initY = 0.17;
+  // elige si es premio o castigo 
+  if(Math.random()>paramProbabilidad){
    var item = premio;
   }else{
     var item = castigo;
   }
-  var ap = creaAnimacionPremio(item,0.23,-0.23,observar);
 
+  // animar el item premio | castigo
+  var ap = creaAnimacionPremio(item,initY,-0.23,observar);
+  ap.start();
+  // escucha si el premio cae
   premio.transform.position.y.lt(-0.23).onOn().subscribe(()=>{
-    const continua = observar.pinLastValue()>0;
+    // si el timepo no termina continua
+    const continua = observar.pinLastValue() > 0;
     const probabilidad = Math.random()>paramProbabilidad;
+    // detien la animación 
     ap.stop();
     if(continua){
       if(!probabilidad){
         premio.hidden = true;
-        castigo.hidden = false;
-        ap = creaAnimacionPremio(castigo,0.23,-0.23,observar);
+        ap = creaAnimacionPremio(castigo,initY,-0.23,observar);
       }else{
-        ap = creaAnimacionPremio(premio,0.23,-0.23,observar);
+        ap = creaAnimacionPremio(premio,initY,-0.23,observar);
       }
+      ap.start();
     }
   });
+
+  // premio.transform.position.y.lt()
   castigo.transform.position.y.lt(-0.23).onOn().subscribe(()=>{
     const continua = observar.pinLastValue()>0;
     const probabilidad = Math.random()>paramProbabilidad;
     ap.stop();
     if(continua){
       if(probabilidad){
-        premio.hidden = false;
         castigo.hidden = true;
-        ap = creaAnimacionPremio(premio,0.23,-0.23,observar);
+        ap = creaAnimacionPremio(premio,initY,-0.23,observar);
       }else{
-        ap = creaAnimacionPremio(castigo,0.23,-0.23,observar);
+        ap = creaAnimacionPremio(castigo,initY,-0.23,observar);
       }
+      ap.start();
     }
   });
-
 }
 
+// TODO: documentar
 export function iniciaColiciones(premios,colicion,consecuencia,tolerancia){
   premios.forEach((p)=>{
     colisionDosObj(p,colicion,tolerancia,consecuencia);
@@ -200,6 +194,7 @@ export function creaControladorTiempo(tiempo,repeticiones=1,espejo=false,
     }
     return controlador;
 }
+
 
 export function aleratorioInt(min, max) {
     return Math.floor( Math.random() * (max - min) + min);
