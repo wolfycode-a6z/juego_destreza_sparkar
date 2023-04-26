@@ -121,19 +121,44 @@ export function animacionPremios(premios,castigos,observar){
 }
 
 function prueba(premio,castigo,observar){
+  const paramProbabilidad = 0.2;
   var cont = 1;
-  if(Math.random()>0.9){
-    var item = premio;
-    Diagnostics.log("Soy bueno");
+  if(cont%2==0){
+   var item = premio;
   }else{
     var item = castigo;
-    Diagnostics.log("Soy malo");
   }
-  const ap = creaAnimacionPremio(item,0.23,-0.23,observar);
-  item.transform.position.y.lt(-0.23).or(observar.eq(0)).onOn().subscribe(()=>{
+  var ap = creaAnimacionPremio(item,0.23,-0.23,observar);
+
+  premio.transform.position.y.lt(-0.23).onOn().subscribe(()=>{
+    const continua = observar.pinLastValue()>0;
+    const probabilidad = Math.random()>paramProbabilidad;
     ap.stop();
-    prueba(premio,castigo,observar);
+    if(continua){
+      if(!probabilidad){
+        premio.hidden = true;
+        castigo.hidden = false;
+        ap = creaAnimacionPremio(castigo,0.23,-0.23,observar);
+      }else{
+        ap = creaAnimacionPremio(premio,0.23,-0.23,observar);
+      }
+    }
   });
+  castigo.transform.position.y.lt(-0.23).onOn().subscribe(()=>{
+    const continua = observar.pinLastValue()>0;
+    const probabilidad = Math.random()>paramProbabilidad;
+    ap.stop();
+    if(continua){
+      if(probabilidad){
+        premio.hidden = false;
+        castigo.hidden = true;
+        ap = creaAnimacionPremio(premio,0.23,-0.23,observar);
+      }else{
+        ap = creaAnimacionPremio(castigo,0.23,-0.23,observar);
+      }
+    }
+  });
+
 }
 
 export function iniciaColiciones(premios,colicion,consecuencia,tolerancia){

@@ -54,7 +54,7 @@ import { relative } from 'path';
   //* NOTE: Inicio de variables clave del juego
   let tiempo = 30;
   let score = 0;
-  const vidas = Reactive.val(3);
+  let vidas =3;
 
   // FIXME: inicia las animaciones
   function comenzarJuego(){
@@ -70,16 +70,15 @@ import { relative } from 'path';
       textTiempo.text = animacionTiempo.round().pinLastValue()+" s";
     });
 
-    // * animar los premios - agregar las coliciones
+    // * agregar las coliciones
     utl.iniciaColiciones(premios,planeEscondite,incrementaScore,0.03);
     utl.iniciaColiciones(castigos,planeEscondite,quitarVidas,0.03);
 
+    // !animacion
     utl.animacionPremios(premios,castigos,animacionTiempo);
-    vidas.sub(1);
-    vidas.sub(1);
-    Diagnostics.watch("vidas: ",vidas);
+
     // si el tiempo termina muestra gameOver
-    animacionTiempo.eq(0).or(vidas.eq(0)).onOn().subscribe(()=>{
+    animacionTiempo.eq(0).onOn().subscribe(()=>{
       rectanguloTiempo.hidden = true;
       textVidas.hidden = true;
       textScore.hidden = true;
@@ -97,8 +96,11 @@ import { relative } from 'path';
 
   function quitarVidas(castigo){
     castigo.hidden = true;
-    vidas.sum(-1);
-    textVidas.text = `Vidas: ${vidas.pinLastValue()}`;
+    vidas--;
+    textVidas.text = `Vidas: ${vidas}`;
+    if(vidas == 0){
+      
+    }
   }
 
   function incrementaScore(premio){
@@ -134,7 +136,7 @@ function animarTecuiche(tecuiche,barra){
   })
   tecuiche.transform.position = Reactive.point(x,baseAnimation,0);
   tecuiche.hidden.onOn().subscribe(()=>{
-    baseDriver.stop();
+    baseDriver.onCompleted();
   });
 }
 
