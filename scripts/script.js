@@ -119,7 +119,7 @@ import * as utl from './utils.js';
     }else{
       try {
         await localStorage.set('highScore',{value:score});
-        actualizarScoreText = `¡Genial!\nTu puntaje más alto: ${highScore.value}`;
+        actualizarScoreText = `¡Genial!\nTu puntaje más alto: ${score}`;
       } catch (error) {
         Diagnostics.log('error puntuación');
       }
@@ -148,32 +148,6 @@ import * as utl from './utils.js';
   // * si pulso la pantalla inicia
   pulseStar.subscribe(comenzarJuego);
 })();
-
-
-function animarTecuiche(tecuiche,barra){
-  const tiempo = aleratorioInt(20,80) * 100;
-  const y = 0.23;
-  const x = tecuiche.transform.x.pinLastValue();
-  //*NOTE: Animación
-  const baseDriverParameters = {
-    durationMilliseconds: tiempo,
-    loopCount: 1,
-    mirror: false
-  };
-  const baseDriver = Animation.timeDriver(baseDriverParameters);
-  baseDriver.start();
-      
-  const baseSampler = Animation.samplers.linear(y,-y);
-  const baseAnimation = Animation.animate(baseDriver,baseSampler);
-  barra.width.eq(0).onOn().subscribe(()=>{
-    baseDriver.stop();
-    Diagnostics.log(" ya no")
-  })
-  tecuiche.transform.position = Reactive.point(x,baseAnimation,0);
-  tecuiche.hidden.onOn().subscribe(()=>{
-    baseDriver.onCompleted();
-  });
-}
 
 /**
   * La función establece el tamaño de respuesta y la posición de un objeto y 
