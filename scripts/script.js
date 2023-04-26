@@ -37,7 +37,7 @@ import * as utl from './utils.js';
 
   //* NOTE: recuperar objetos de la scena.
   const [rectanguloTiempo,textScore,textTiempo,textGameOver,
-    display,planeEscondite,pulseStar,pulseOO] = await Promise.all([
+    display,planeEscondite,pulseStar] = await Promise.all([
     Scene.root.findFirst('rectanguloTiempo'),
     Scene.root.findFirst('textScore'),
     Scene.root.findFirst('textTiempo'),
@@ -45,7 +45,6 @@ import * as utl from './utils.js';
     Scene.root.findFirst('display'),
     Scene.root.findFirst('escondite'),
     Patches.outputs.getPulse('Star'),
-    Patches.outputs.getPulse('ocultarObjetos'),
   ]);
   
   //*NOTE: Usu del canva display para optener el tamaño del dispositivo.
@@ -94,6 +93,7 @@ import * as utl from './utils.js';
     rectanguloTiempo.hidden = false;
     textScore.hidden = false;
     textTiempo.hidden = false;
+    planeEscondite.hidden = false;
     animacionRectangulo[0].start();
     animacionTiempo[0].start();
     // NOTE: crear animaciónes e iniciarlas para premios y castigos.
@@ -103,6 +103,7 @@ import * as utl from './utils.js';
 
   }
 
+  // NOTE:Terminar 
   async function terminar(){
     rectanguloTiempo.hidden = true;
     textScore.hidden = true;
@@ -127,7 +128,7 @@ import * as utl from './utils.js';
     textGameOver.hidden = false;
     // TODO: animación final particulas 
     // Devuelve un EventSource(pulso) que emite un evento vacío una sola vez, tan pronto como sea posible.
-    Patches.inputs.setPulse('GameOver',Reactive.once())
+    // Patches.inputs.setPulse('GameOver',Reactive.once())
   }
 
   function decrementarScore(castigo){

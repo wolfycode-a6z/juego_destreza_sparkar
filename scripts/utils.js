@@ -93,7 +93,7 @@ export function animacionLineal(controladorTiempo,inicio,final){
 function creaAnimacionPremio(premio,inicio,final){
   premio.hidden = false;
   // FIXME: velocidad
-  const driveTiempo = creaControladorTiempo(0,1,false,true,30,90);
+  const driveTiempo = creaControladorTiempo(0,1,false,true,15,50);
   const animacion = animacionLineal(driveTiempo,inicio,final);
   premio.transform.position = Reactive.point(premio.transform.position.x.pinLastValue(),animacion[1],0);
   return animacion[0];
