@@ -1,28 +1,27 @@
 // cargar los modulos
 const Scene = require('Scene');
 const Patches = require('Patches');
-const Reactive = require('Reactive');
-const Animation = require('Animation');
 const Persistence = require('Persistence');
 const FaceTracking = require('FaceTracking');
 
 // mensajes en consola
 export const Diagnostics = require('Diagnostics');
-// ? funciones de utils
+
+//* funciones de utils
 import * as utl from './utils.js';
 
 (async function () {
   
-  //* NOTE: Inicio de variables clave del juego
+  //* NOTE: Inicio de variables del juego
   let tiempo = 30;
   let score = 0;
   let highScore = 0;
-  const paramProbabilidad = 0.3;
-  const tolerancia = 0.03;
-
   let actualizarScoreText = "";
+
   // guardar la referencia al localStore
   const localStorage = Persistence.local;
+
+
   //* NOTE: recupera el score mas alto
   try {
     highScore = await localStorage.get('highScore');
@@ -60,14 +59,15 @@ import * as utl from './utils.js';
   //*NOTE: Recupera objetos castigo
   const castigos = await Scene.root.findByPath("**/bad*");
   //* NOTE: inicia los premios en su lugar
-  utl.iniciarObjetos(premios,-0.075,0.05);
-  utl.iniciarObjetos(castigos,-0.075,0.05);
+  utl.iniciarObjetos(premios);
+  utl.iniciarObjetos(castigos);
 
-  //*NOTE: inicializar objetos de la barra de tiempo 
-  tamanioYposicion(rectanguloTiempo,display_width,display_height,80,6,10,8,true);
-  tamanioYposicion(textScore,display_width,display_height,37,6,10,13,true);
-  tamanioYposicion(textTiempo,display_width,display_height,14,6,75,13,true);
-  tamanioYposicion(textGameOver,display_width,display_height,80,30,10,15,true);
+  //*NOTE: inicializar objetos de la barra de tiempo
+  //! comentar si el tamaño y la posición se realiza en spark studio 
+  utl.tamanioYposicion(rectanguloTiempo,display_width,display_height,80,6,10,8,true);
+  utl.tamanioYposicion(textScore,display_width,display_height,37,6,10,13,true);
+  utl.tamanioYposicion(textTiempo,display_width,display_height,14,6,75,13,true);
+  utl.tamanioYposicion(textGameOver,display_width,display_height,80,30,10,15,true);
   textScore.text = `Score: ${score}`;
   textTiempo.text = `${tiempo} s`;
 
@@ -85,8 +85,8 @@ import * as utl from './utils.js';
   });
 
   //* NOTE: agregar las coliciones
-  utl.iniciaColiciones(premios,planeEscondite,incrementaScore,tolerancia);
-  utl.iniciaColiciones(castigos,planeEscondite,decrementarScore,tolerancia);
+  utl.iniciaColiciones(premios,planeEscondite,incrementaScore);
+  utl.iniciaColiciones(castigos,planeEscondite,decrementarScore);
 
   //* NOTE: inicia las animaciones
   function comenzarJuego(){
@@ -97,7 +97,7 @@ import * as utl from './utils.js';
     animacionRectangulo[0].start();
     animacionTiempo[0].start();
     // NOTE: crear animaciónes e iniciarlas para premios y castigos.
-    utl.animacionPremios(premios,castigos,paramProbabilidad,animacionTiempo[1]);
+    utl.animacionPremios(premios,castigos,animacionTiempo[1]);
     // si el tiempo termina muestra gameOver
     animacionTiempo[1].eq(0).onOn().subscribe(terminar);
 
@@ -108,6 +108,7 @@ import * as utl from './utils.js';
     rectanguloTiempo.hidden = true;
     textScore.hidden = true;
     textTiempo.hidden = true;
+    planeEscondite.hidden = true;
     premios.forEach((p)=>{
       p.hidden = true;
     });
@@ -126,6 +127,7 @@ import * as utl from './utils.js';
     }
     textGameOver.text = actualizarScoreText;
     textGameOver.hidden = false;
+    
     // TODO: animación final particulas 
     // Devuelve un EventSource(pulso) que emite un evento vacío una sola vez, tan pronto como sea posible.
     // Patches.inputs.setPulse('GameOver',Reactive.once())
@@ -148,21 +150,3 @@ import * as utl from './utils.js';
   // * si pulso la pantalla inicia
   pulseStar.subscribe(comenzarJuego);
 })();
-
-/**
-  * La función establece el tamaño de respuesta y la posición de un objeto y 
-  * también puede esconderlo.
-  * @param obj - El objeto que necesita ser redimensionado y reposicionado.
-  * @param wDispaly - El ancho de la pantalla de visualización.
-  * @param hDisplay - La altura de la pantalla donde estará el objeto.
-  * @param wTamanio - tamaño del ancho del objeto
-  * @param hTamanio - El tamaño de la altura del objeto.
-  * @param wPosicion - La posición de ancho del objeto,posición horizontal.
-  * @param hPosicion - La posición de altura del objeto,posición vertical.
-  * @param oculto - Valor booleano que determina si el objeto debe estar oculto.
-  */
-function tamanioYposicion(obj,wDispaly,hDisplay,wTamanio,hTamanio,wPosicion,hPosicion,oculto){
-  utl.estableceTamanioResponcivo(wDispaly,hDisplay,wTamanio,hTamanio,obj);
-  utl.establecePosicionReponcivo(wDispaly,hDisplay,wPosicion,hPosicion,obj);
-  obj.hidden = oculto;
-}

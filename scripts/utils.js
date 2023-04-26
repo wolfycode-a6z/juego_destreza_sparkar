@@ -1,7 +1,26 @@
+// import {velocidadMax,
+//   velocidadMin,
+//   paramProbabilidad,
+//   tolerancia,
+//   visibilidadEnY,
+//   terminaLaAnimacion,
+//   inicioPx,
+//   sepPx,
+//   Diagnostics,
+// } from './script.js';
+
 const Reactive = require('Reactive');
 const Animation = require('Animation');
-// mensajes en consola
-export const Diagnostics = require('Diagnostics');
+
+export const velocidadMax = 15; 
+export const velocidadMin = 40;
+export const paramProbabilidad = 0.3;
+export const tolerancia = 0.03;
+export const visibilidadEnY = 0.17;
+export const posicionEnY = 0.17;
+export const terminaLaAnimacion = -0.23;
+export const inicioPx = -0.075;
+export const sepPx = 0.05;
 
 /**
  * Esta función establece el tamaño de respuesta de un objeto en función del
@@ -42,12 +61,12 @@ export function establecePosicionReponcivo(wDisplay,hDisplay,wRelativo,hRelativo
  * @param sep - Distancia de separación entre los objetos en el array. se utiliza
  * para calcular la posicion de cada objeto.
  */
-export function iniciarObjetos(objArray,inicio,sep){
-    let x = inicio
+export function iniciarObjetos(objArray){
+    var x = inicioPx;
     objArray.forEach((obj)=>{
       obj.hidden = true;
-      obj.transform.position = Reactive.point(x,0.23,0);
-      x+=sep;
+      obj.transform.position = Reactive.point(x,posicionEnY,0);
+      x+=sepPx;
     });
 }
 
@@ -63,7 +82,7 @@ export function iniciarObjetos(objArray,inicio,sep){
  * @returns el valor de la variable `n`, que es el último carácter de la
   * Propiedad `name` de `obj1` analizada como un entero.
  */
-export function colisionDosObj(obj1,obj2,tolerancia,consecuencia){
+export function colisionDosObj(obj1,obj2,consecuencia){
     const n = parseInt((obj1.name[obj1.name.length - 1]));
     const obj2X = obj2.transform.x;
     const obj2Y = obj2.transform.y;
@@ -93,22 +112,21 @@ export function animacionLineal(controladorTiempo,inicio,final){
 function creaAnimacionPremio(premio,inicio,final){
   premio.hidden = false;
   // FIXME: velocidad
-  const driveTiempo = creaControladorTiempo(0,1,false,true,15,50);
+  const driveTiempo = creaControladorTiempo(0,1,false,true,velocidadMax,velocidadMin);
   const animacion = animacionLineal(driveTiempo,inicio,final);
   premio.transform.position = Reactive.point(premio.transform.position.x.pinLastValue(),animacion[1],0);
   return animacion[0];
 }
 
 // TODO: documentar
-export function animacionPremios(premios,castigos,probabilidad,observar){
+export function animacionPremios(premios,castigos,observar){
   premios.forEach((p,i)=>{
-    animarPremios(p,castigos[i],probabilidad,observar);
+    animarPremios(p,castigos[i],observar);
   });
 }
 
 // TODO: documentar
-function animarPremios(premio,castigo,paramProbabilidad,observar){
-  const initY = 0.17;
+function animarPremios(premio,castigo,observar){
   // elige si es premio o castigo 
   if(Math.random()>paramProbabilidad){
    var item = premio;
@@ -117,10 +135,10 @@ function animarPremios(premio,castigo,paramProbabilidad,observar){
   }
 
   // animar el item premio | castigo
-  var ap = creaAnimacionPremio(item,initY,-0.23,observar);
+  var ap = creaAnimacionPremio(item,visibilidadEnY,terminaLaAnimacion,observar);
   ap.start();
   // escucha si el premio cae
-  premio.transform.position.y.lt(-0.23).onOn().subscribe(()=>{
+  premio.transform.position.y.lt(terminaLaAnimacion).onOn().subscribe(()=>{
     // si el timepo no termina continua
     const continua = observar.pinLastValue() > 0;
     const probabilidad = Math.random()>paramProbabilidad;
@@ -129,25 +147,25 @@ function animarPremios(premio,castigo,paramProbabilidad,observar){
     if(continua){
       if(!probabilidad){
         premio.hidden = true;
-        ap = creaAnimacionPremio(castigo,initY,-0.23,observar);
+        ap = creaAnimacionPremio(castigo,visibilidadEnY,terminaLaAnimacion,observar);
       }else{
-        ap = creaAnimacionPremio(premio,initY,-0.23,observar);
+        ap = creaAnimacionPremio(premio,visibilidadEnY,terminaLaAnimacion,observar);
       }
       ap.start();
     }
   });
 
   // premio.transform.position.y.lt()
-  castigo.transform.position.y.lt(-0.23).onOn().subscribe(()=>{
+  castigo.transform.position.y.lt(terminaLaAnimacion).onOn().subscribe(()=>{
     const continua = observar.pinLastValue()>0;
     const probabilidad = Math.random()>paramProbabilidad;
     ap.stop();
     if(continua){
       if(probabilidad){
         castigo.hidden = true;
-        ap = creaAnimacionPremio(premio,initY,-0.23,observar);
+        ap = creaAnimacionPremio(premio,visibilidadEnY,terminaLaAnimacion,observar);
       }else{
-        ap = creaAnimacionPremio(castigo,initY,-0.23,observar);
+        ap = creaAnimacionPremio(castigo,visibilidadEnY,terminaLaAnimacion,observar);
       }
       ap.start();
     }
@@ -155,9 +173,9 @@ function animarPremios(premio,castigo,paramProbabilidad,observar){
 }
 
 // TODO: documentar
-export function iniciaColiciones(premios,colicion,consecuencia,tolerancia){
+export function iniciaColiciones(premios,colicion,consecuencia){
   premios.forEach((p)=>{
-    colisionDosObj(p,colicion,tolerancia,consecuencia);
+    colisionDosObj(p,colicion,consecuencia);
   });
 }
 
@@ -195,6 +213,23 @@ export function creaControladorTiempo(tiempo,repeticiones=1,espejo=false,
     return controlador;
 }
 
+/**
+  * La función establece el tamaño de respuesta y la posición de un objeto y 
+  * también puede esconderlo.
+  * @param obj - El objeto que necesita ser redimensionado y reposicionado.
+  * @param wDispaly - El ancho de la pantalla de visualización.
+  * @param hDisplay - La altura de la pantalla donde estará el objeto.
+  * @param wTamanio - tamaño del ancho del objeto
+  * @param hTamanio - El tamaño de la altura del objeto.
+  * @param wPosicion - La posición de ancho del objeto,posición horizontal.
+  * @param hPosicion - La posición de altura del objeto,posición vertical.
+  * @param oculto - Valor booleano que determina si el objeto debe estar oculto.
+  */
+export function tamanioYposicion(obj,wDispaly,hDisplay,wTamanio,hTamanio,wPosicion,hPosicion,oculto){
+  estableceTamanioResponcivo(wDispaly,hDisplay,wTamanio,hTamanio,obj);
+  establecePosicionReponcivo(wDispaly,hDisplay,wPosicion,hPosicion,obj);
+  obj.hidden = oculto;
+}
 
 export function aleratorioInt(min, max) {
     return Math.floor( Math.random() * (max - min) + min);
