@@ -6,8 +6,8 @@ const FaceTracking = require('FaceTracking');
 const Reactive = require('Reactive');
 
 /* Estas son constantes usadas en el juego para establecer la tolerancia de colisión
-detección (`tolerancia`), la posición inicial de los objetos (`inicioPx`), la
-separación entre objetos (`sepPx`), y la probabilidad de que aparezca un premio
+(`tolerancia`), la posición inicial de los objetos (`inicioPx`), la
+separación entre objetos (`sepPx`), y la probabilidad de que aparezca un premio.
 */
 const tolerancia = 0.03;
 const inicioPx = -0.075;
@@ -17,11 +17,16 @@ const paramProbabilidad = 0.3;
 // mensajes en consola
 export const Diagnostics = require('Diagnostics');
 
-//* funciones de utils
+/*está importando todo lo exportado del módulo `utils.js` */
 import * as utl from './utils.js';
 
 (async function () {
-  /* NOTE: variables de inicialización para el juego. */
+  // NOTE: variables de inicialización para el juego.
+  /*Variables de inicialización para el juego. `tiempo` representa el límite de tiempo 
+  para el juego, `puntuación` representa la puntuación del jugador, `highScore` representa
+  la puntuación más alta alcanzada en sesiones anteriores (que se recuperará  del 
+  almacenamiento local si está disponible) y `actualizarScoreText` es una cadena vacía 
+  que se usará para actualizar el mensaje de fin del juego con el puntuación del jugador.*/
   let tiempo = 30;
   let score = 0;
   let highScore = 0;
@@ -30,16 +35,16 @@ import * as utl from './utils.js';
   //*NOTE: persistencia
   /* Creando una referencia al objeto de almacenamiento local provisto por la Persistencia
    módulo en la API JavaScript de Spark AR Studio. Esto permite que el script almacene
-   y recuperar datos localmente en el dispositivo del usuario. */
+   y recupere datos localmente en el dispositivo del usuario. */
   const localStorage = Persistence.local; 
 
   //* NOTE: recupera el score mas alto
-  /* Este bloque de código intenta recuperar la puntuación más alta del almacenamiento local mediante
-  el método `localStorage.get()` proporcionado por el módulo `Persistence` en el
-  API de Spark AR Studio. Primero intenta recuperar la puntuación más alta y registra un
-  mensaje que indica si se recuperó correctamente o no. si un error
-  ocurre durante el proceso de recuperación, registra un mensaje que indica que la puntuación
-  no pudo ser recuperado. */
+  /* Este bloque de código intenta recuperar la puntuación más alta del almacenamiento
+   local mediante el método `localStorage.get()` proporcionado por el módulo `Persistence`
+   en el API de Spark AR Studio. Primero intenta recuperar la puntuación más alta 
+   y registra un mensaje que indica si se recuperó correctamente o no. si un error
+   ocurre durante el proceso de recuperación, registra un mensaje que indica que
+   la puntuación no pudo ser recuperado. */
   try {
     highScore = await localStorage.get('highScore');
     if(highScore){
@@ -52,14 +57,14 @@ import * as utl from './utils.js';
   }
   
   //* NOTE: recuperar objetos de la scena.
-  /* Este código utiliza la asignación de desestructuración para asignar múltiples variables en
-   una vez de los valores resueltos de una Promesa devuelta por `Promise.all()`. El
-   A Promise se le pasa una serie de promesas que se resuelven en los objetos.
-   representando diferentes elementos en la escena Spark AR Studio. las variables
-   asignados corresponden a estos elementos y se utilizarán más adelante en el
-   código. */
+  /* Este código utiliza la asignación de desestructuración para asignar múltiples
+   variables en una vez de los valores resueltos de una Promesa devuelta por 
+   `Promise.all()`. Al Promise.all([]) se le pasa una serie de promesas que se resuelven 
+   en los objetos representando diferentes elementos en la escena Spark AR Studio. 
+   Las variables asignados corresponden a estos elementos y se utilizarán más 
+   adelante en el código. */
   const [rectanguloTiempo,textScore,textTiempo,textGameOver,
-    display,planeEscondite,pulseStar] = await Promise.all([
+    display,planeJugador,pulseStar] = await Promise.all([
     Scene.root.findFirst('rectanguloTiempo'),
     Scene.root.findFirst('textScore'),
     Scene.root.findFirst('textTiempo'),
@@ -72,26 +77,27 @@ import * as utl from './utils.js';
   //*NOTE: Usu del canva display para optener el tamaño del dispositivo.
   utl.tamanioPantalla(display);
 
-  //*NOTE: Que el planeEscondite siga el rostro.
-  /* posición del objeto `planeEscondite`,seguir la posición de la cara del usuario.
+  //*NOTE: Que el planeJugador siga el rostro.
+  /* posición del objeto `planeJugador`,seguir la posición de la cara del usuario.
    Está utilizando el módulo `FaceTracking` para rastrear la posición de la cara
-   del usuario y actualizar la posición `x` e `y` de el objeto `planeEscondite`*/
-  planeEscondite.transform.x = FaceTracking.face(0).cameraTransform.position.x;
-  planeEscondite.transform.y = FaceTracking.face(0).cameraTransform.position.y;
+   del usuario y actualizar la posición `x` e `y` de el objeto `planeJugador`*/
+  planeJugador.transform.x = FaceTracking.face(0).cameraTransform.position.x;
+  planeJugador.transform.y = FaceTracking.face(0).cameraTransform.position.y;
 
   //*NOTE: Recupera objetos premio y castigo 
-  /* Estas líneas de código usan el método `findByPath()` del módulo `Scene`
-  para encontrar todos los objetos en la escena que tienen un patrón de nombre específico. El `**` es
-  un comodín que coincida con cualquier número de niveles en la jerarquía de la escena, y
-  `tecuich*` y `bad*` son patrones que coinciden con cualquier objeto cuyo nombre comience
-  con "tecuich" o "bad", respectivamente. Los objetos resultantes se almacenan en el
-  variables `premios` y `castigos`, que se utilizan más adelante en el código para
-  inicialice las posiciones de los objetos y agregue detección de colisión. */
-  const premios = await Scene.root.findByPath("**/tecuich*");
-  const castigos = await Scene.root.findByPath("**/bad*");
+  /* Estas líneas de código usan el método `findByPath()` del módulo `Scene` para 
+  encontrar todos los objetos en la escena que tienen un patrón de nombre específico.
+  El `**` es un comodín que coincida con cualquier número de niveles en la jerarquía 
+  de la escena, y `recompensa*` y `castigo*` son patrones que coinciden con cualquier
+  objeto cuyo nombre comience con "recompensa" o "castigo", respectivamente. 
+  Los objetos resultantes se almacenan en el variables `recompensas` y `castigos`,
+  que se utilizan más adelante en el código para inicialice las posiciones de los
+  objetos y agregue detección de colisión. */
+  const recompensas = await Scene.root.findByPath("**/recompensa*");
+  const castigos = await Scene.root.findByPath("**/castigo*");
  
   //* NOTE: inicia los premios en su lugar
-  utl.iniciarObjetos(premios,inicioPx,sepPx);
+  utl.iniciarObjetos(recompensas,inicioPx,sepPx);
   utl.iniciarObjetos(castigos,inicioPx,sepPx);
 
   //* NOTE: Valores iniciales de Score y tiempo 
@@ -119,8 +125,8 @@ import * as utl from './utils.js';
   });
 
   //* NOTE: agregar las coliciones
-  utl.iniciaColiciones(premios,planeEscondite,tolerancia,incrementaScore);
-  utl.iniciaColiciones(castigos,planeEscondite,tolerancia,decrementarScore);
+  utl.iniciaColiciones(recompensas,planeJugador,tolerancia,incrementaScore);
+  utl.iniciaColiciones(castigos,planeJugador,tolerancia,decrementarScore);
 
   /**
    * La función "comenzarJuego" inicia un juego ocultando ciertos elementos,
@@ -130,14 +136,21 @@ import * as utl from './utils.js';
   function comenzarJuego(){
     rectanguloTiempo.hidden = false;
     textTiempo.hidden = false;
-    planeEscondite.hidden = false;
+    planeJugador.hidden = false;
     textScore.hidden = false;
     animacionRectangulo[0].start();
     animacionTiempo[0].start();
     // NOTE: crear animaciónes e iniciarlas para premios y castigos.
-    utl.animacionPremios(premios,castigos,animacionTiempo[1],paramProbabilidad);
+    utl.animacionPremios(recompensas,castigos,animacionTiempo[1],paramProbabilidad);
     
     // si el tiempo termina muestra gameOver
+    /* `animacionTiempo[1].eq(0).onOn().subscribe(terminar)` está configurando un
+    suscripción al evento `onOn()` de una animación creada usando el Función 
+    `animacionLineal()`. Este evento se desencadena cuando la animación llega a
+    su valor final, que en este caso es 0 (lo que indica que el tiempo se ha 
+    alcanzado el límite del juego). Cuando se desencadena el evento, el se llama
+    a la función `terminar()`, que oculta varios elementos y muestra el mensaje 
+    con la puntuación del jugador. */
     animacionTiempo[1].eq(0).onOn().subscribe(terminar);
   }
 
@@ -151,8 +164,8 @@ import * as utl from './utils.js';
     rectanguloTiempo.hidden = true;
     textScore.hidden = true;
     textTiempo.hidden = true;
-    planeEscondite.hidden = true;
-    premios.forEach((p)=>{
+    planeJugador.hidden = true;
+    recompensas.forEach((p)=>{
       p.hidden = true;
     });
     castigos.forEach((c)=>{
@@ -195,10 +208,10 @@ import * as utl from './utils.js';
 
   /**
    * La función incrementa la puntuación y oculta un elemento dado.
-   * @param premio - El parámetro "premio" es le objeto que tiene que esconder
+   * @param recompensa - El parámetro "recompensa" es le objeto que tiene que esconder
    */
-  function incrementaScore(premio){
-    premio.hidden = true;
+  function incrementaScore(recompensa){
+    recompensa.hidden = true;
     score++;
     textScore.text = `Score: ${score}`;
   }
