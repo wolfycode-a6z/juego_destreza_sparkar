@@ -3,9 +3,10 @@
 __Crear un juego de realidad aumentada con experiencia interactiva.__    
 Atrapa el mayor número de recompensas posibles (gana puntos) esquivando los castigos (pierde puntos). El jugador controla el juego con la nariz moviéndose en un plano 2D, se termina la partida en un tiempo determinado (30s) mostrando el puntaje más alto en las sesiones anteriores. El juego solo funciona con la cámara frontal del dispositivo.
 
-|inicio|juego|final|
-|:-:|:-:|:-:|
-|![inicio](img/inicio.png)|![juego](img/juego.png)|![final](img/final.png)|
+|inicio|juego|final|ejemplo|
+|-|-|-|-|
+|![inicio](img/inicio.png)|![juego](img/juego.png)|![final](img/final.png)|![ejemplo](img/juego.gif)
+
 
 ## Tabla de contenido:
 - [🚀 Comenzando][1]
