@@ -1,5 +1,5 @@
 # Juego de destreza en META SPARK AR
-<!-- -->
+<!-- Hola mundo -->
 __Crear un juego de realidad aumentada con experiencia interactiva.__    
 Atrapa el mayor número de recompensas posibles (gana puntos) esquivando los castigos (pierde puntos). El jugador controla el juego con la nariz moviéndose en un plano 2D, se termina la partida en un tiempo determinado (30s) mostrando el puntaje más alto en las sesiones anteriores. El juego solo funciona con la cámara frontal del dispositivo.
 
