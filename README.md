@@ -41,7 +41,7 @@ La aplicación móvil Spark AR Player es una aplicación gratuita que te permite
 
 ## Contribuyendo 🖇️
 
-Por favor lee el [CONTRIBUTING.md]() para detalles de nuestro código de 
+Por favor lee el [CONTRIBUTING.md](https://github.com/wolfycode-a6z/.github/blob/main/CONTRIBUTING.md) para detalles de nuestro código de 
 conducta, y el proceso para enviarnos pull requests.
 ## Versionado 📌
 Usamos [SemVer](http://semver.org/) para el versionado. Para 
